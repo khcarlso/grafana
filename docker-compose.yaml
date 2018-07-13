@@ -1,0 +1,51 @@
+version: '3.2'
+services:
+  influx:
+    image: influxdb
+    volumes:
+      - type: volume
+        source: influxdb
+        target: /var/lib/influxdb
+    environment:
+      INFLUXDB_DB: primary
+      INFLUXDB_ADMIN_USER: admin
+      INFLUXDB_ADMIN_PASSWORD: admin
+    ports:
+      - "8086:8086"
+    networks:
+      - grafana
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - type: volume
+        source: grafana
+        target: /var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3000:3000"
+    networks:
+      - grafana
+
+  chronograph:
+    image: quay.io/influxdb/chronograf:1.5.0.1
+    volumes:
+      - type: volume
+        source: chronograf
+        target: /var/lib/chronograf
+    ports:
+      - "8888:8888"
+    links:
+      - influx
+    networks:
+      - grafana
+
+networks:
+  grafana:
+
+volumes:
+  influxdb:
+  grafana:
+  chronograf:
